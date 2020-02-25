@@ -82,6 +82,7 @@ def zpool_scrub (pool):
     stdout, stderr = scrub_p.communicate()
     if stderr:
         raise ZFSCommandError(stderr.decode().strip())
+    logging.info('scrub: {0}'.format(pool))
 
 
 def zpool_status (pool):
