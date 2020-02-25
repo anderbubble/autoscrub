@@ -1,6 +1,5 @@
 ## Now
 
-- add logging
 - `--help` output
 
 

@@ -4,9 +4,13 @@
 import argparse
 import configparser
 import datetime
+import logging
 import re
 import subprocess
 import sys
+
+
+LOGGING_FORMAT = 'autoscrub: %(message)s'
 
 
 scan_p = re.compile(b'^ *scan: *(.*) *$', re.MULTILINE)
@@ -18,12 +22,17 @@ def main ():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='/etc/autoscrub.ini')
     parser.add_argument('--force', action='store_true', default=None)
+    parser.add_argument('-v', '--verbose', action='count', default=0)
+    parser.add_argument('-q', '--quiet', action='count', default=0)
     parser.add_argument('pools', nargs='*')
 
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
     config.read(args.config)
+
+    log_level = logging.INFO - (args.verbose * 10) + (args.quiet * 10)
+    logging.basicConfig(format=LOGGING_FORMAT, level=log_level)
 
     pools = args.pools if args.pools else config.sections()
     for pool in pools:
@@ -39,16 +48,18 @@ def handle_exception (func):
     try:
         func()
     except AutoscrubException as ex:
-        print('{0}: {1}'.format(ex.prefix, ex), file=sys.stderr)
+        logging.error(ex)
         sys.exit(ex.retcode)
 
 
 def time_to_scrub (ref, pool, days):
     try:
         scan_time, end = zpool_status(pool)
-    except NotScanned:
+    except NotScanned as ex:
+        logging.debug(ex)
         return True
     except InProgress:
+        logging.debug(ex)
         return False
 
     start = end - scan_time
@@ -107,6 +118,9 @@ def zpool_status (pool):
 class AutoscrubException (Exception):
     prefix = 'unknown'
     retcode = -1
+
+    def __str__ (self):
+        return '{0}: {1}'.format(self.prefix, super().__str__())
 
 class AutoscrubError (AutoscrubException):
     prefix = 'error'
