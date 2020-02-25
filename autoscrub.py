@@ -16,18 +16,19 @@ scan_results_p = re.compile(b'scrub repaired [^ ]+ in ([0-9]+) days ([0-9]+):([0
 
 def main ():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default='/etc/autoscrub.ini')
     parser.add_argument('--force', action='store_true', default=None)
     parser.add_argument('pools', nargs='*')
 
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
-    config.read('autoscrub.ini')
+    config.read(args.config)
 
     pools = args.pools if args.pools else config.sections()
     for pool in pools:
         if pool not in config:
-            raise ConfigError(pool)
+            raise Unconfigured(pool)
 
     for pool in pools:
         if args.force or time_to_scrub(config[pool]['ref'].lower(), pool, int(config[pool]['days'])):
@@ -111,17 +112,25 @@ class AutoscrubError (AutoscrubException):
     prefix = 'error'
     retcode = -2
 
-class NotScanned (AutoscrubException): pass
+class NotScanned (AutoscrubException):
+    prefix = 'not scanned'
 
-class InProgress (AutoscrubException): pass
+class InProgress (AutoscrubException):
+    prefix = 'in progress'
 
 class ConfigError (AutoscrubException):
+    prefix = 'config error'
     retcode = 1
 
+class Unconfigured (ConfigError):
+    prefix = 'unconfigured'
+
 class ZFSCommandError (AutoscrubError):
+    prefix = 'command failed'
     retcode = 2
 
 class ParseError (AutoscrubError):
+    prefix = 'parse error'
     retcode = 3
 
 

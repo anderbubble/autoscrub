@@ -2,7 +2,6 @@
 
 - add logging
 - read autoscrub.init from /etc by default
-- `--config` argument
 - `--help` output
 
 
