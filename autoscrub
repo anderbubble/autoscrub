@@ -58,7 +58,7 @@ def time_to_scrub (ref, pool, days):
     except NotScanned as ex:
         logging.debug(ex)
         return True
-    except InProgress:
+    except InProgress as ex:
         logging.debug(ex)
         return False
 
