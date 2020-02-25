@@ -1,8 +1,3 @@
-## Now
-
-- `--help` output
-
-
 ## Future
 
 - templates

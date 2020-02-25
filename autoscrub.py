@@ -21,10 +21,10 @@ scan_results_p = re.compile(b'scrub repaired [^ ]+ in ([0-9]+) days ([0-9]+):([0
 def main ():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='/etc/autoscrub.ini')
-    parser.add_argument('--force', action='store_true', default=None)
-    parser.add_argument('-v', '--verbose', action='count', default=0)
-    parser.add_argument('-q', '--quiet', action='count', default=0)
-    parser.add_argument('pools', nargs='*')
+    parser.add_argument('--force', action='store_true', default=None, help='scrub regardless of the schedule')
+    parser.add_argument('-v', '--verbose', action='count', default=0, help='increase logging')
+    parser.add_argument('-q', '--quiet', action='count', default=0, help='decrease logging')
+    parser.add_argument('pools', nargs='*', help='limit the pools to scrub')
 
     args = parser.parse_args()
 
