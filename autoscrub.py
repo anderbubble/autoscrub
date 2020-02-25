@@ -6,6 +6,7 @@ import configparser
 import datetime
 import re
 import subprocess
+import sys
 
 
 scan_p = re.compile(b'^ *scan: *(.*) *$', re.MULTILINE)
@@ -39,6 +40,14 @@ def main ():
         scrub_expected = period_start + datetime.timedelta(days=int(config[pool]['days']))
         if scrub_expected <= datetime.datetime.now():
             zpool_scrub(pool)
+
+
+def handle_exception (func):
+    try:
+        func()
+    except AutoscrubException, ex:
+        print('{0}: {1}'.format(ex.prefix, ex), file=sys.stderr)
+        sys.exit(ex.retcode)
 
 
 def zpool_scrub (pool):
@@ -79,9 +88,11 @@ def zpool_status (pool):
 
 
 class AutoscrubException (Exception):
+    prefix = 'unknown'
     retcode = -1
 
 class AutoscrubError (AutoscrubException):
+    prefix = 'error'
     retcode = -2
 
 class NotScanned (AutoscrubException): pass
