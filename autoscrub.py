@@ -10,6 +10,7 @@ import sys
 
 
 scan_p = re.compile(b'^ *scan: *(.*) *$', re.MULTILINE)
+scrub_in_progress_p = re.compile(b'^scrub in progress (.*)$')
 scan_results_p = re.compile(b'scrub repaired [^ ]+ in ([0-9]+) days ([0-9]+):([0-9]+):([0-9]+) with [0-9]+ errors on (.+)$')
 
 
@@ -29,7 +30,7 @@ def main ():
             raise ConfigError(pool)
 
     for pool in pools:
-        if args.force or time_to_scrub(config[pool]['ref'].lower(), pool):
+        if args.force or time_to_scrub(config[pool]['ref'].lower(), pool, int(config[pool]['days'])):
             zpool_scrub(pool)
 
 
@@ -41,11 +42,13 @@ def handle_exception (func):
         sys.exit(ex.retcode)
 
 
-def time_to_scrub (ref, pool):
+def time_to_scrub (ref, pool, days):
     try:
         scan_time, end = zpool_status(pool)
     except NotScanned:
         return True
+    except InProgress:
+        return False
 
     start = end - scan_time
 
@@ -56,7 +59,7 @@ def time_to_scrub (ref, pool):
     else:
         raise ConfigError('unknown value: {0}: ref: {1}'.format(pool, config[pool]['ref']))
 
-    scrub_expected = period_start + datetime.timedelta(days=int(config[pool]['days']))
+    scrub_expected = period_start + datetime.timedelta(days=days)
     return scrub_expected <= datetime.datetime.now()
 
 
@@ -84,6 +87,9 @@ def zpool_status (pool):
         raise NotScanned('{0}: {1}'.format(pool, scan_results))
     scan_results_match = scan_results_p.match(scan_results)
     if not scan_results_match:
+        in_progress_match = scrub_in_progress_p.match(scan_results)
+        if in_progress_match:
+            raise InProgress(in_progress_match.group(1).decode())
         raise ParseError('{0}: {1}'.format(pool, scan_results))
     days, hours, minutes, seconds, end = scan_results_match.groups()
     scan_td = datetime.timedelta(
@@ -106,6 +112,8 @@ class AutoscrubError (AutoscrubException):
     retcode = -2
 
 class NotScanned (AutoscrubException): pass
+
+class InProgress (AutoscrubException): pass
 
 class ConfigError (AutoscrubException):
     retcode = 1
