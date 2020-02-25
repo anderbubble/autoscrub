@@ -35,7 +35,7 @@ def main ():
         elif config[pool]['ref'].lower() == 'end':
             period_start = end
         else:
-            raise Exception('unknown value: {0}: ref: {1}'.format(pool, config[pool]['ref']))
+            raise ConfigError('unknown value: {0}: ref: {1}'.format(pool, config[pool]['ref']))
         scrub_expected = period_start + datetime.timedelta(days=int(config[pool]['days']))
         if scrub_expected <= datetime.datetime.now():
             zpool_scrub(pool)
@@ -47,7 +47,7 @@ def zpool_scrub (pool):
         args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = scrub_p.communicate()
     if stderr:
-        raise Exception(stderr)
+        raise ZFSCommandError(stderr)
 
 
 def zpool_status (pool):
@@ -56,16 +56,16 @@ def zpool_status (pool):
         args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = status_p.communicate()
     if stderr:
-        raise Exception(stderr)
+        raise ZFSCommandError(stderr)
     scan_p_match = scan_p.search(stdout)
     if not scan_p_match:
-        raise Exception('no scan data for pool {0}'.format(pool))
+        raise NotScanned('{0}: absent'.format(pool))
     scan_results = scan_p_match.group(1)
     if scan_results == b'none requested':
-        raise NotScanned(pool)
+        raise NotScanned('{0}: {1}'.format(pool, scan_results))
     scan_results_match = scan_results_p.match(scan_results)
     if not scan_results_match:
-        raise Exception('unable to parse scan results for pool {0}: {1}'.format(pool, scan_results))
+        raise ParseError('{0}: {1}'.format(pool, scan_results))
     days, hours, minutes, seconds, end = scan_results_match.groups()
     scan_td = datetime.timedelta(
         days = int(days),
@@ -78,7 +78,22 @@ def zpool_status (pool):
     return (scan_td, end_dt)
 
 
-class NotScanned (Exception): pass
+class AutoscrubException (Exception):
+    retcode = -1
+
+class AutoscrubError (AutoscrubException):
+    retcode = -2
+
+class NotScanned (AutoscrubException): pass
+
+class ConfigError (Exception):
+    retcode = 1
+
+class ZFSCommandError (AutoscrubError):
+    retcode = 2
+
+class ParseError (AutoscrubError):
+    retcode = 3
 
 
 if __name__ == '__main__':
