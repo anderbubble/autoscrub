@@ -1,7 +1,6 @@
 ## Now
 
 - add logging
-- read autoscrub.init from /etc by default
 - `--help` output
 
 
