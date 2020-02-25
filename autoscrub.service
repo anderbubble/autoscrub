@@ -1,0 +1,10 @@
+[Unit]
+Description=Automatically scrub ZFS pools
+Requires=zfs.target
+After=zfs.target
+ConditionFileNotEmpty=/etc/autoscrub.ini
+
+[Service]
+Environment=TZ=UTC
+Type=oneshot
+ExecStart=/opt/autoscrub/autoscrub

@@ -17,8 +17,15 @@ ref=end
 days=7
 ```
 
-## command
+
+## Install
 
 ```
-python3 autoscrub.py
+git clone https://github.com/anderbubble/autoscrub.git /opt/autoscrub
+cp /opt/autoscrub/autoscrub-example.ini /etc/autoscrub.ini
+ln -s /opt/autoscrub/autoscrub.service /etc/systemd/system/autoscrub.service
+ln -s /opt/autoscrub/autoscrub.timer /etc/systemd/system/autoscrub.timer
+systemctl daemon-reload
+systemctl enable autoscrub.timer
+systemctl start autoscrub.timer
 ```
