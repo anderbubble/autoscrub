@@ -15,6 +15,7 @@ scan_results_p = re.compile(b'scrub repaired [^ ]+ in ([0-9]+) days ([0-9]+):([0
 
 def main ():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--force', action='store_true', default=None)
     parser.add_argument('pools', nargs='*')
 
     args = parser.parse_args()
@@ -22,32 +23,41 @@ def main ():
     config = configparser.ConfigParser()
     config.read('autoscrub.ini')
 
-    for pool in config.sections():
-        if args.pools and pool not in args.pools:
-            continue
-        try:
-            scan_time, end = zpool_status(pool)
-        except NotScanned:
-            zpool_scrub(pool)
-            continue
-        start = end - scan_time
-        if config[pool]['ref'].lower() == 'start':
-            period_start = start
-        elif config[pool]['ref'].lower() == 'end':
-            period_start = end
-        else:
-            raise ConfigError('unknown value: {0}: ref: {1}'.format(pool, config[pool]['ref']))
-        scrub_expected = period_start + datetime.timedelta(days=int(config[pool]['days']))
-        if scrub_expected <= datetime.datetime.now():
+    pools = args.pools if args.pools else config.sections()
+    for pool in pools:
+        if pool not in config:
+            raise ConfigError(pool)
+
+    for pool in pools:
+        if args.force or time_to_scrub(config[pool]['ref'].lower(), pool):
             zpool_scrub(pool)
 
 
 def handle_exception (func):
     try:
         func()
-    except AutoscrubException, ex:
+    except AutoscrubException as ex:
         print('{0}: {1}'.format(ex.prefix, ex), file=sys.stderr)
         sys.exit(ex.retcode)
+
+
+def time_to_scrub (ref, pool):
+    try:
+        scan_time, end = zpool_status(pool)
+    except NotScanned:
+        return True
+
+    start = end - scan_time
+
+    if ref == 'start':
+        period_start = start
+    elif ref == 'end':
+        period_start = end
+    else:
+        raise ConfigError('unknown value: {0}: ref: {1}'.format(pool, config[pool]['ref']))
+
+    scrub_expected = period_start + datetime.timedelta(days=int(config[pool]['days']))
+    return scrub_expected <= datetime.datetime.now()
 
 
 def zpool_scrub (pool):
@@ -56,16 +66,16 @@ def zpool_scrub (pool):
         args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = scrub_p.communicate()
     if stderr:
-        raise ZFSCommandError(stderr)
+        raise ZFSCommandError(stderr.decode().strip())
 
 
 def zpool_status (pool):
-    args = ['zpool', 'status', '-vp', pool]
+    args = ['zpool', 'status', pool]
     status_p = subprocess.Popen(
         args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = status_p.communicate()
     if stderr:
-        raise ZFSCommandError(stderr)
+        raise ZFSCommandError(stderr.decode().strip())
     scan_p_match = scan_p.search(stdout)
     if not scan_p_match:
         raise NotScanned('{0}: absent'.format(pool))
@@ -97,7 +107,7 @@ class AutoscrubError (AutoscrubException):
 
 class NotScanned (AutoscrubException): pass
 
-class ConfigError (Exception):
+class ConfigError (AutoscrubException):
     retcode = 1
 
 class ZFSCommandError (AutoscrubError):
@@ -108,4 +118,4 @@ class ParseError (AutoscrubError):
 
 
 if __name__ == '__main__':
-    main()
+    handle_exception(main)
