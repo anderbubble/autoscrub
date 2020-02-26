@@ -28,6 +28,31 @@ days=7
 ```
 
 
+## autoscrub command-line options
+
++ --config
+
+	Specify a location for the config file. Defaults to /etc/autoscrub.ini
+
++ --force
+
+	Start scrubs on configured pools now, ignoring the schedule.
+
++ -v, --verbose
+
+	Increase logging verbosity (by lowering the log level). Can be
+	specified multiple times.
+
++ -q, --quiet
+
+        Decrease logging verbosity (by raising the log level). Can be
+        specified multiple times.
+
++ --help
+
+	Show help message.
+
+
 ## Install
 
 In lieu of packages, the simplest way to install autoscrub is by
