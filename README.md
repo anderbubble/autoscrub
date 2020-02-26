@@ -5,24 +5,25 @@
 
 A policy-based ZFS auto-scrubber.
 
-Inspired by syncoid, the policy-based ZFS auto-snapshotter.
+Inspired by [syncoid](https://github.com/jimsalterjrs/sanoid), the
+policy-based ZFS auto-snapshotter.
 
 
 ## Example
 
 autoscrub starts scrubs after a certain number of days, counting
-either from the start of the previous scrub (`ref=start`) or the end
-of the previous scrub (`ref=end`).
+either from the start of the previous scrub (`previous=start`) or the
+end of the previous scrub (`previous=end`).
 
 ### autoscrub.ini
 
 ```
 [tank]
-ref=start
+previous=start
 days=30
 
 [bowl]
-ref=end
+previous=end
 days=7
 ```
 

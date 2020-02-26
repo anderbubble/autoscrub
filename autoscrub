@@ -46,7 +46,14 @@ def main ():
             raise Unconfigured(pool)
 
     for pool in pools:
-        if args.force or time_to_scrub(config[pool]['ref'].lower(), pool, int(config[pool]['days'])):
+        previous = config[pool].get('previous', 'start')
+        days = config[pool].get('days', 30)
+        try:
+            days = int(days)
+        except ValueError:
+            raise ConfigError('{0}: invalid days: {1}'.format(pool, days))
+
+        if args.force or time_to_scrub(previous, pool, days):
             zpool_scrub(pool)
 
 
@@ -58,7 +65,7 @@ def handle_exception (func):
         sys.exit(ex.retcode)
 
 
-def time_to_scrub (ref, pool, days):
+def time_to_scrub (previous, pool, days):
     try:
         scan_time, end = zpool_status(pool)
     except NotScanned as ex:
@@ -70,12 +77,12 @@ def time_to_scrub (ref, pool, days):
 
     start = end - scan_time
 
-    if ref == 'start':
+    if previous == 'start':
         period_start = start
-    elif ref == 'end':
+    elif previous == 'end':
         period_start = end
     else:
-        raise ConfigError('unknown value: {0}: ref: {1}'.format(pool, config[pool]['ref']))
+        raise ConfigError('{0}: unknown previous value: {1}'.format(pool, previous))
 
     scrub_expected = period_start + datetime.timedelta(days=days)
     return scrub_expected <= datetime.datetime.now()
