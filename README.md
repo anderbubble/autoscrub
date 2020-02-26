@@ -1,7 +1,9 @@
 <!-- Any copyright is dedicated to the Public Domain.
    - https://creativecommons.org/publicdomain/zero/1.0/ -->
 
-Policy-based ZFS auto-scrubber
+# autoscrub
+
+A policy-based ZFS auto-scrubber.
 
 Inspired by syncoid, the policy-based ZFS auto-snapshotter.
 
