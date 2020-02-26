@@ -8,6 +8,10 @@ Inspired by syncoid, the policy-based ZFS auto-snapshotter.
 
 ## Example
 
+autoscrub starts scrubs after a certain number of days, counting
+either from the start of the previous scrub (`ref=start`) or the end
+of the previous scrub (`ref=end`).
+
 ### autoscrub.ini
 
 ```
@@ -23,6 +27,11 @@ days=7
 
 ## Install
 
+In lieu of packages, the simplest way to install autoscrub is by
+cloning its repository to `/opt/autoscrub`. From there, the sample
+systemd unit files may be copied or linked into the appropriate
+places, an a config file defined in `/etc`.
+
 ```
 git clone https://github.com/anderbubble/autoscrub.git /opt/autoscrub
 cp /opt/autoscrub/autoscrub-example.ini /etc/autoscrub.ini
@@ -32,6 +41,7 @@ systemctl daemon-reload
 systemctl enable autoscrub.timer
 systemctl start autoscrub.timer
 ```
+
 
 ## License and copyright
 
