@@ -1,3 +1,6 @@
+<!-- Any copyright is dedicated to the Public Domain.
+   - https://creativecommons.org/publicdomain/zero/1.0/ -->
+
 Policy-based ZFS auto-scrubber
 
 Inspired by syncoid, the policy-based ZFS auto-snapshotter.
@@ -29,3 +32,11 @@ systemctl daemon-reload
 systemctl enable autoscrub.timer
 systemctl start autoscrub.timer
 ```
+
+## License and copyright
+
+autoscrub is distributed under the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+Copyright 2020 Jonathon Anderson, civilfritz.net
