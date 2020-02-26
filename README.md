@@ -12,8 +12,10 @@ policy-based ZFS auto-snapshotter.
 ## Example
 
 autoscrub starts scrubs after a certain number of days, counting
-either from the start of the previous scrub (`previous=start`) or the
-end of the previous scrub (`previous=end`).
+either from the start of the previous scrub (`previous=start`, the
+default) or the end of the previous scrub (`previous=end`). The
+default period is `days=30`. A pool must be defined in the config file
+for autoscrub to start a scrub on it.
 
 ### autoscrub.ini
 
