@@ -60,7 +60,7 @@ days=7
 In lieu of packages, the simplest way to install autoscrub is by
 cloning its repository to `/opt/autoscrub`. From there, the sample
 systemd unit files may be copied or linked into the appropriate
-places, an a config file defined in `/etc`.
+places, and a config file defined in `/etc`.
 
 ```
 git clone https://github.com/anderbubble/autoscrub.git /opt/autoscrub
