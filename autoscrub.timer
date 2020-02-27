@@ -2,11 +2,11 @@
 # https://creativecommons.org/publicdomain/zero/1.0/
 
 [Unit]
-Description=Run autoscrub every day
+Description=Run autoscrub once an hour
 Requires=sanoid.service
 
 [Timer]
-OnCalendar=daily
+OnCalendar=hourly
 Persistent=true
 
 [Install]

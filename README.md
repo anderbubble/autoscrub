@@ -65,6 +65,15 @@ places, and a config file defined in `/etc`.
 ```
 git clone https://github.com/anderbubble/autoscrub.git /opt/autoscrub
 cp /opt/autoscrub/autoscrub-example.ini /etc/autoscrub.ini
+```
+
+
+### systemd
+
+The sample systemd unit files may be copied or linked into the appropriate
+places, and a config file defined in `/etc`.
+
+```
 ln -s /opt/autoscrub/autoscrub.service /etc/systemd/system/autoscrub.service
 ln -s /opt/autoscrub/autoscrub.timer /etc/systemd/system/autoscrub.timer
 systemctl daemon-reload
@@ -72,6 +81,13 @@ systemctl enable autoscrub.timer
 systemctl start autoscrub.timer
 ```
 
+### cron
+
+The sample cron file may be copied or linked into `cron.d`.
+
+```
+ln -s /opt/autoscrub/autoscrub-cron /etc/cron.d/autoscrub
+```
 
 ## License and copyright
 
