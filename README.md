@@ -48,7 +48,7 @@ with cron, you can "start a scrub after the pool has gone without one
 for 30 days," which takes into account how long the scrub itself
 takes.
 
-In the future, it will also be possible to configure autoscrub to
+In the future (#2) it will also be possible to configure autoscrub to
 limit the number of simultaneous scrubs. e.g., in a system with many
 pools, it may be desirable to limit the number of scrubs that are
 running at any given time. In this case, autoscrub will evaluate all
