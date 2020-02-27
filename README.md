@@ -73,8 +73,8 @@ an allowed number of scrubs.
 
 + -q, --quiet
 
-        Decrease logging verbosity (by raising the log level). Can be
-        specified multiple times.
+	Decrease logging verbosity (by raising the log level). Can be
+	specified multiple times.
 
 + --help
 
