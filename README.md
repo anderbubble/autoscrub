@@ -29,6 +29,32 @@ previous=end
 days=7
 ```
 
+## Rationale
+
+> Why not just use a monthly cron job?
+
+There are several corner-cases when running `zpool scrub` directly
+from cron or a timer. We've experienced instances where DST changes
+caused cron to try to start a scrub twice in two hours, or to skip a
+scrub. Using autoscrub obviates this by considering scrubs frequently
+and starting scrubs based on relative time records. It also prevents
+errors--and/or missed scrubs--in instances where the time to complete
+a scrub has crept past the cron cron interval.
+
+Perhaps less common, but still possible with autoscrub, is to
+configure a scrub to start after a period of idle; so rather than
+"start a scrub every 30 days," which is the kind of thing you can do
+with cron, you can "start a scrub after the pool has gone without one
+for 30 days," which takes into account how long the scrub itself
+takes.
+
+In the future, it will also be possible to configure autoscrub to
+limit the number of simultaneous scrubs. e.g., in a system with many
+pools, it may be desirable to limit the number of scrubs that are
+running at any given time. In this case, autoscrub will evaluate all
+pools eligible for scrubbing against a sorting metric and start only
+an allowed number of scrubs.
+
 
 ## autoscrub command-line options
 
