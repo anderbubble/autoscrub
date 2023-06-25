@@ -21,7 +21,7 @@ LOGGING_FORMAT = 'autoscrub: %(message)s'
 
 scan_p = re.compile(b'^ *scan: *(.*) *$', re.MULTILINE)
 scrub_in_progress_p = re.compile(b'^scrub in progress (.*)$')
-scan_results_p = re.compile(b'scrub repaired [^ ]+ in ([0-9]+) days ([0-9]+):([0-9]+):([0-9]+) with [0-9]+ errors on (.+)$')
+scan_results_p = re.compile(b'scrub repaired [^ ]+ in ((?P<days>[0-9]+) days )?(?P<hours>[0-9]+):(?P<minutes>[0-9]+):(?P<seconds>[0-9]+) with [0-9]+ errors on (?P<end>.+)$')
 
 
 def main ():
@@ -117,7 +117,8 @@ def zpool_status (pool):
         if in_progress_match:
             raise InProgress(in_progress_match.group(1).decode())
         raise ParseError('{0}: {1}'.format(pool, scan_results))
-    days, hours, minutes, seconds, end = scan_results_match.groups()
+    days, hours, minutes, seconds, end = scan_results_match.group('days'), scan_results_match.group('hours'), scan_results_match.group('minutes'), scan_results_match.group('seconds'), scan_results_match.group('end'),
+    if days == None: days = '0'
     scan_td = datetime.timedelta(
         days = int(days),
         seconds = (
